@@ -26,12 +26,17 @@ const App = {
 
   loadContract: async () => {
     try {
-      const todoListArtifact = await $.getJSON('artifacts/contracts/TodoList.sol/TodoList.json');
+      const todoListArtifact = require('./artifacts/contracts/TodoList.sol/TodoList.json');
       const networkId = (await App.provider.getNetwork()).chainId;
-      const deployedNetwork = todoListArtifact.networks[networkId];
       
+      // 從本地存儲獲取合約地址
+      const contractAddress = localStorage.getItem('todoListAddress');
+      if (!contractAddress) {
+        throw new Error("Contract address not found");
+      }
+
       App.contract = new ethers.Contract(
-        deployedNetwork.address,
+        contractAddress,
         todoListArtifact.abi,
         App.signer
       );
