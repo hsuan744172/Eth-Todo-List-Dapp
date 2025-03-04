@@ -1,54 +1,59 @@
-const { assert } = require("chai")
+const { expect } = require("chai");
 
-const TodoList = artifacts.require('./TodoList.sol')
+describe("TodoList", function() {
+  let TodoList, todoList, owner;
 
-contract('TodoList', (accounts) => {
-  before(async () => {
-    this.todoList = await TodoList.deployed()
-  })
+  beforeEach(async function() {
+    TodoList = await ethers.getContractFactory("TodoList");
+    todoList = await TodoList.deploy();
+    await todoList.deployed();
+    [owner] = await ethers.getSigners();
+  });
 
-  it('deploys successfully', async () => {
-    const address = await this.todoList.address
-    assert.notEqual(address, 0x0)
-    assert.notEqual(address, '')
-    assert.notEqual(address, null)
-    assert.notEqual(address, undefined)
-  })
+  it("deploys successfully", async function() {
+    expect(todoList.address).to.not.equal(0x0);
+    expect(todoList.address).to.not.equal('');
+    expect(todoList.address).to.not.equal(null);
+    expect(todoList.address).to.not.equal(undefined);
+  });
 
-  it('lists tasks', async () => {
-    const taskCount = await this.todoList.taskCount()
-    assert.equal(taskCount.toNumber(), 2)  // Should be 2 initial tasks
+  it("lists tasks", async function() {
+    const taskCount = await todoList.taskCount();
+    expect(taskCount).to.equal(2);  // Should be 2 initial tasks
 
-    // Check first task
-    const task1 = await this.todoList.tasks(1)
-    assert.equal(task1.id.toNumber(), 1)
-    assert.equal(task1.content, 'Check my task')
-    assert.equal(task1.completed, false)
+    const task1 = await todoList.tasks(1);
+    expect(task1.id).to.equal(1);
+    expect(task1.content).to.equal('Check my task');
+    expect(task1.completed).to.equal(false);
 
-    // Check second task
-    const task2 = await this.todoList.tasks(2)
-    assert.equal(task2.id.toNumber(), 2)
-    assert.equal(task2.content, 'Eat Dinner')
-    assert.equal(task2.completed, false)
-  })
+    const task2 = await todoList.tasks(2);
+    expect(task2.id).to.equal(2);
+    expect(task2.content).to.equal('Eat Dinner');
+    expect(task2.completed).to.equal(false);
+  });
 
-  it('creates tasks', async () => {
-    const result = await this.todoList.createTask('A new task')
-    const taskCount = await this.todoList.taskCount()
-    assert.equal(taskCount, 3)  // Should be 3 after adding new task
-    const event = result.logs[0].args
-    assert.equal(event.id.toNumber(), 3)  // Should be id 3
-    assert.equal(event.content, 'A new task')
-    assert.equal(event.completed, false)
-  })
+  it("creates tasks", async function() {
+    const tx = await todoList.createTask('A new task');
+    const taskCount = await todoList.taskCount();
+    expect(taskCount).to.equal(3);  // Should be 3 after adding new task
+    
+    const task = await todoList.tasks(3);
+    expect(task.id).to.equal(3);
+    expect(task.content).to.equal('A new task');
+    expect(task.completed).to.equal(false);
+    
+    await expect(tx)
+      .to.emit(todoList, 'TaskCreated')
+      .withArgs(3, 'A new task', false);
+  });
 
-  it('toggles task completion', async () => {
-    const result = await this.todoList.toggleCompleted(1)
-    const task = await this.todoList.tasks(1)
-    assert.equal(task.completed, true)
-    const event = result.logs[0].args
-    assert.equal(event.id.toNumber(), 1)
-    assert.equal(event.completed, true)
-  })
-
-})
+  it("toggles task completion", async function() {
+    const tx = await todoList.toggleCompleted(1);
+    const task = await todoList.tasks(1);
+    expect(task.completed).to.equal(true);
+    
+    await expect(tx)
+      .to.emit(todoList, 'TaskCompleted')
+      .withArgs(1, true);
+  });
+});
