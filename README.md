@@ -105,10 +105,15 @@ eth-todo-list/
    - 確認是否正確連接到正確網路
    - 檢查 console 錯誤訊息
 
-## 開發注意事項
+## 注意事項
 
 - 所有合約互動都是非同步的
 - 每次合約操作都會觸發相應的事件
 - 使用 `try-catch` 處理所有合約調用
 - 確保妥善處理交易等待狀態
 - 測試時用Ganache (本地區塊鏈)不需要花自己的錢
+
+## 畫面
+![Ganache](images/Ganache.png)
+![interface](images/interface.png)
+![metamask](images/metamask.png)
