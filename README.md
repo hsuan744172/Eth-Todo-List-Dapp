@@ -114,6 +114,6 @@ eth-todo-list/
 - 測試時用Ganache (本地區塊鏈)不需要花自己的錢
 
 ## 畫面
-![Ganache](images/Ganache.png)
-![interface](images/interface.png)
-![metamask](images/metamask.png)
+![Ganache](image/Ganache.png)
+![interface](image/interface.png)
+![metamask](image/metamask.png)
